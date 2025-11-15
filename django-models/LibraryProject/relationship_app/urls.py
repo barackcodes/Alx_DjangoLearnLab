@@ -1,6 +1,7 @@
 from django.urls import path
-from . import views  # Make sure there is a space after the dot
+from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),  # Temporary placeholder
+    path('books/', views.list_books, name='list_books'), 
+    path('library/<int:pk>/', views.LibraryDetailView.as_view(), name='library_detail'), 
 ]
