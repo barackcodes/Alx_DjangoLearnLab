@@ -11,7 +11,7 @@ class PostListView(ListView):
     model = Post
     template_name = 'blog/post_list.html'
     context_object_name = 'posts'
-    ordering = ['-date_posted']
+    ordering = ['-created_at']
     paginate_by = 5
 
 
