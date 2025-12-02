@@ -178,3 +178,16 @@ You now have a complete authentication system ready to use or expand with blog p
 ## Author
 
 Created for training and project building in **Alx_DjangoLearnLab**.
+
+## Blog Post Features
+
+- Users can view all posts at `/posts/`
+- Click a post to see details `/posts/<id>/`
+- Authenticated users can:
+  - Create new posts at `/posts/new/`
+  - Edit their own posts at `/posts/<id>/edit/`
+  - Delete their own posts at `/posts/<id>/delete/`
+- Permissions:
+  - Only authors can edit/delete their posts
+  - Anyone can view posts
+
