@@ -1,0 +1,27 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<h2>Your Profile</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset>
+        <legend>Update User Info</legend>
+        {{ u_form.as_p }}
+    </fieldset>
+
+    <fieldset>
+        <legend>Update Profile</legend>
+        {{ p_form.as_p }}
+    </fieldset>
+
+    <button type="submit">Update Profile</button>
+</form>
+
+{% if user.profile.image %}
+    <h3>Current Profile Picture:</h3>
+    <img src="{{ user.profile.image.url }}" alt="Profile Picture" style="max-width:200px;">
+{% endif %}
+{% endblock %}
