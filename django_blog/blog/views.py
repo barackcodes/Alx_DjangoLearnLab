@@ -2,23 +2,17 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
-
-from django.views.generic import (
-    ListView, DetailView, CreateView,
-    UpdateView, DeleteView
-)
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-
 from .forms import CustomUserCreationForm, UserUpdateForm, ProfileUpdateForm
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post
-
 
 class PostListView(ListView):
     model = Post
-    template_name = 'blog/post_list.html'   # FIXED
+    template_name = 'blog/post_list.html'
     context_object_name = 'posts'
     ordering = ['-date_posted']
-    paginate_by = 5 
+    paginate_by = 5
 
 
 class PostDetailView(DetailView):
@@ -42,7 +36,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'blog/post_form.html'
 
     def form_valid(self, form):
-        form.instance.author = self.request.user   # FIXED typo
+        form.instance.author = self.request.user
         return super().form_valid(form)
 
     def test_func(self):
@@ -53,28 +47,25 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     template_name = 'blog/post_confirm_delete.html'
-    success_url = '/posts/'
+    success_url = '/post/'
 
     def test_func(self):
-        post = self.get_object() 
+        post = self.get_object()
         return self.request.user == post.author
 
 
 def register(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
-
         if form.is_valid():
             user = form.save()
             auth_login(request, user)
-            messages.success(request, "Registration successful. You're now logged in.")
-            return redirect('blog:post-list')   # FIXED
-        else:
-            messages.error(request, "Please correct the errors below.")
+            messages.success(request, "Registration successful.")
+            return redirect('blog:post-list')
     else:
         form = CustomUserCreationForm()
 
-    return render(request, 'registration/register.html', {'form': form})  # FIXED TEMPLATE
+    return render(request, 'blog/register.html', {'form': form})
 
 
 @login_required
@@ -90,15 +81,11 @@ def profile_edit(request):
 
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
-            p_form.save()  
-            messages.success(request, "Your profile has been updated.")
+            p_form.save()
+            messages.success(request, "Profile updated.")
             return redirect('blog:profile')
-        else:
-            messages.error(request, "Please fix the errors below.")
-
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.profile)
 
-    context = {'u_form': u_form, 'p_form': p_form}
-    return render(request, 'blog/profile_edit.html', context)
+    return render(request, 'blog/profile_edit.html', {'u_form': u_form, 'p_form': p_form})
