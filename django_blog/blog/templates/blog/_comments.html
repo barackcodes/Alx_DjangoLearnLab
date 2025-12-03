@@ -1,0 +1,30 @@
+{% load humanize %}
+<div id="comments-section">
+  <h3>{{ post.comments.count }} comment{% if post.comments.count != 1 %}s{% endif %}</h3>
+
+  {% for comment in post.comments.all %}
+    <div class="comment" id="comment-{{ comment.pk }}">
+      <p class="meta">
+        <strong>{{ comment.author.username }}</strong>
+        &middot;
+        <small title="{{ comment.created_at }}">{{ comment.created_at|naturaltime }}</small>
+        {% if comment.created_at != comment.updated_at %}
+          <small>(edited)</small>
+        {% endif %}
+      </p>
+      <div class="content">
+        <p>{{ comment.content|linebreaksbr }}</p>
+      </div>
+      <div class="comment-actions">
+        {% if user.is_authenticated and comment.author == user %}
+          <a href="{% url 'blog:comment_edit' comment.pk %}">Edit</a>
+          |
+          <a href="{% url 'blog:comment_delete' comment.pk %}">Delete</a>
+        {% endif %}
+      </div>
+    </div>
+    <hr>
+  {% empty %}
+    <p>No comments yet. Be the first to comment!</p>
+  {% endfor %}
+</div>

@@ -1,11 +1,54 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
 from .forms import CustomUserCreationForm, UserUpdateForm, ProfileUpdateForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .models import Post
+from .models import Post, Comment
+from django.urls import reverse, reverse_lazy
+from .forms import CommentForm
+
+
+@login_required
+def comment_create(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    if request.method == 'POST':
+        form = CommentForm(request.POSt)
+        if form.is_():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            return redirect('blog:post_detail', pk=post.pk)
+    else:
+        form = CommentForm()
+        return render(request, 'blog/comment_form.html', {'form': form, 'post': post})
+    
+    
+class CommentEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+    
+    def get_success_url(self):
+        return reverse('blog:post_detail', kwargs={'pk':self.object.post.pk})
+    
+    def test_func(self):
+        comment = self.get_object()
+        return comment.author == self.request.user
+    
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name ='blog/comment_confirm_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.object.post.pk})
+    
+    def test_func(self):
+        comment = self.get_object()
+        return comment.author == self.request.user
+
 
 class PostListView(ListView):
     model = Post

@@ -191,3 +191,38 @@ Created for training and project building in **Alx_DjangoLearnLab**.
   - Only authors can edit/delete their posts
   - Anyone can view posts
 
+Comment System (blog app)
+-------------------------
+
+What it does:
+- Allows authenticated users to create comments on a Post.
+- Comment authors can edit and delete their comments.
+- Comments are shown on the Post detail page.
+
+Files added/changed:
+- blog/models.py: Comment model
+- blog/forms.py: CommentForm
+- blog/views.py: comment_create, CommentEditView, CommentDeleteView
+- blog/urls.py: comment_create, comment_edit, comment_delete routes
+- templates/blog/_comments.html: comments list partial
+- templates/blog/comment_form.html: add/edit comment form
+- templates/blog/comment_confirm_delete.html: delete confirmation
+- templates/blog/post_detail.html: include comments & form (small change)
+- migrations/*: created by makemigrations
+
+How to use:
+1. Migrate database:
+   python manage.py makemigrations blog
+   python manage.py migrate
+
+2. Ensure `post_detail` view/context includes `CommentForm()` as `comment_form` (or update template to only use create view).
+
+3. Create a superuser and some posts, then log in and test comments.
+
+Permissions:
+- Only logged-in users can create comments.
+- Only the comment's author can edit or delete that comment.
+
+Notes:
+- Comment `created_at` and `updated_at` are automatically managed.
+- Ordering is oldest → newest; change `ordering` in `Comment.Meta` if you prefer newest-first.
