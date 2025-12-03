@@ -10,44 +10,46 @@ from django.urls import reverse, reverse_lazy
 from .forms import CommentForm
 
 
-@login_required
-def comment_create(request, post_id):
-    post = get_object_or_404(Post, pk=post_id)
-    if request.method == 'POST':
-        form = CommentForm(request.POSt)
-        if form.is_():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.author = request.user
-            comment.save()
-            return redirect('blog:post_detail', pk=post.pk)
-    else:
-        form = CommentForm()
-        return render(request, 'blog/comment_form.html', {'form': form, 'post': post})
-    
-    
-class CommentEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
-    template_name = 'blog/comment_form.html'
-    
+    template_name = "blog/comment_form.html"
+
+    def form_valid(self, form):
+        post = get_object_or_404(Post, pk=self.kwargs["post_id"])
+        form.instance.author = self.request.user
+        form.instance.post = post
+        return super().form_valid(form)
+
     def get_success_url(self):
-        return reverse('blog:post_detail', kwargs={'pk':self.object.post.pk})
-    
+        return reverse_lazy("blog:post-detail", kwargs={"pk": self.kwargs["post_id"]})
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "blog/comment_form.html"
+
     def test_func(self):
-        comment = self.get_object()
-        return comment.author == self.request.user
-    
+        return self.get_object().author == self.request.user
+
+    def get_success_url(self):
+        return reverse_lazy("blog:post-detail", kwargs={"pk": self.get_object().post.pk})
+
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Comment
-    template_name ='blog/comment_confirm_delete.html'
-    
-    def get_success_url(self):
-        return reverse_lazy('blog:post_detail', kwargs={'pk': self.object.post.pk})
-    
+    template_name = "blog/comment_confirm_delete.html"
+
     def test_func(self):
-        comment = self.get_object()
-        return comment.author == self.request.user
+        return self.get_object().author == self.request.user
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "blog:post-detail",
+            kwargs={"pk": self.get_object().post.pk}
+        )
+
 
 
 class PostListView(ListView):
