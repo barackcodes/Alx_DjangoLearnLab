@@ -14,7 +14,7 @@ class CommentForm(forms.ModelForm):
     
     class Meta:
         model = Comment
-        fieds = ['content']
+        fields = ['content']
         
         
     def clean_content(self):
