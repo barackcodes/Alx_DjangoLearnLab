@@ -1,39 +1,43 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Profile
-from .models import Comment
-from .models import Post
 
+from .models import Profile, Comment, Post
+from .widgets import TagWidget  
 
 
 class PostForm(forms.ModelForm):
+    tags = forms.CharField(
+        required=False,
+        widget=TagWidget(),
+        help_text="Enter tags separated by commas",
+    )
+
     class Meta:
         model = Post
         fields = ['title', 'content', 'tags']
         widgets = {
-            'content': forms.Textarea(attrs={'rows': 5})
+            'content': forms.Textarea(attrs={'rows': 5}),
         }
 
 
 class CommentForm(forms.ModelForm):
     content = forms.CharField(
-        widget= forms.Textarea(attrs={'rows':3, 'placeholder':'Write your comment...'}),
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write your comment...'}),
         max_length=2000,
         label='',
     )
-    
+
     class Meta:
         model = Comment
         fields = ['content']
-        
-        
+
     def clean_content(self):
         data = self.cleaned_data['content'].strip()
         if not data:
             raise forms.ValidationError("Comment cannot be empty.")
         return data
-
+    
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
@@ -48,12 +52,14 @@ class CustomUserCreationForm(UserCreationForm):
             user.save()
         return user
 
+
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["username", "email"]
 
+
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ["bio", "image"] 
+        fields = ["bio", "image"]
