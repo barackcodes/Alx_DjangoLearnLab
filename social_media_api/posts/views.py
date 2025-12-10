@@ -13,7 +13,6 @@ User = get_user_model()
 class FeedView(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
-
     pagination_class = None
 
     filter_backends = [

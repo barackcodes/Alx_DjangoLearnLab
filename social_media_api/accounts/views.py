@@ -17,6 +17,7 @@ User = get_user_model()
 
 class FollowUserView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.all()
 
     def post(self, request, user_id):
         if request.user.id == user_id:
@@ -31,6 +32,7 @@ class FollowUserView(APIView):
 
 class UnfollowUserView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.all()
 
     def post(self, request, user_id):
         if request.user.id == user_id:
