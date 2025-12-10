@@ -6,6 +6,8 @@ router = DefaultRouter()
 router.register('posts', PostViewSet, basename='posts')
 router.register('comments', CommentViewSet, basename='comments')
 
+app_name = "posts"
+
 urlpatterns = [
     path('', include(router.urls)),
     path('feed/', FeedView.as_view(), name='feed')
