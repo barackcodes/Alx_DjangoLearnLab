@@ -6,7 +6,6 @@ from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsOwnerOrReadOnly
 
-
 User = get_user_model()
 
 
@@ -25,14 +24,12 @@ class FeedView(generics.ListAPIView):
     ordering_fields = ['created_at', 'updated_at']
 
     def get_queryset(self):
-        user = self.request.user 
+        user = self.request.user
+        following_users = user.following.all()
 
-        following_qs = user.following.all()
-
-        return (
-            Post.objects.filter(author__in=following_qs)
-            .order_by('-created_at')
-        )
+        return Post.objects.filter(
+            author__in=following_users
+        ).order_by('-created_at')
 
 
 class PostViewSet(viewsets.ModelViewSet):
