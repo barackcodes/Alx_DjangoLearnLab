@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
-from .permissions import IsOwnerOrReadOnly
 
 User = get_user_model()
 
@@ -27,9 +26,7 @@ class FeedView(generics.ListAPIView):
         user = self.request.user
         following_users = user.following.all()
 
-        return Post.objects.filter(
-            author__in=following_users
-        ).order_by('-created_at')
+        return Post.objects.filter(author__in=following_users).order_by('-created_at')
 
 
 class PostViewSet(viewsets.ModelViewSet):
