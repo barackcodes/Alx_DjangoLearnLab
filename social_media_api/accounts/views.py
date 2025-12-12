@@ -35,20 +35,3 @@ class FollowUserView(generics.GenericAPIView):
         return Response({"detail": "Followed successfully."})
 
 
-class UnfollowUserView(generics.GenericAPIView):
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return CustomUser.objects.all()
-
-    def post(self, request, user_id, *args, **kwargs):
-        target = get_object_or_404(self.get_queryset(), pk=user_id)
-        following = getattr(request.user, "following", None)
-        if following is None:
-            return Response({"detail": "Follow relationship not configured on user model."}, status=500)
-
-        if not following.filter(pk=target.pk).exists():
-            return Response({"detail": "Not following this user."})
-        following.remove(target)
-        return Response({"detail": "Unfollowed successfully."})

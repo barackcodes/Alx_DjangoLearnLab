@@ -2,10 +2,46 @@ from rest_framework import viewsets, permissions, generics, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
 
+
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from .models import Post, Like, Notification
+
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 
 User = get_user_model()
+
+
+class LikePostView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        if not created:
+            return Response({"detail": "Already liked."})
+        Notification.objects.create(
+            user=post.author,
+            sender=request.user,
+            post=post,
+            notification_type='like'
+        )
+        return Response({"detail": "Post liked successfully."})
+
+
+class UnlikePostView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, pk=pk)
+        try:
+            like = Like.objects.get(user=request.user, post=post)
+            like.delete()
+            return Response({"detail": "Post unliked successfully."})
+        except Like.DoesNotExist:
+            return Response({"detail": "You have not liked this post."})
 
 
 class FeedView(generics.ListAPIView):
