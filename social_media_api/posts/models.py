@@ -3,8 +3,45 @@ from django.conf  import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from .models import Post, Like, Notification
+
 User = get_user_model()
 User = settings.AUTH_USER_MODEL
+
+
+class LikePostView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        if not created:
+            return Response({"detail": "Already liked."}, status=400)
+        
+        if post.author != request.user:
+            Notification.objects.create(
+                user=post.author,
+                message=f"{request.user.username} liked your post.",
+                post=post
+            )
+        return Response({"detail": "Post liked successfully."})
+
+
+class UnlikePostView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, pk=pk)
+        try:
+            like = Like.objects.get(user=request.user, post=post)
+            like.delete()
+            return Response({"detail": "Post unliked successfully."})
+        except Like.DoesNotExist:
+            return Response({"detail": "You have not liked this post."}, status=400)
+
 
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
