@@ -22,8 +22,8 @@ def home(request):
     return HttpResponse("Hello! The server is live on Render.")
 
 urlpatterns = [
-    path('', home),
     path('admin/', admin.site.urls),
+    path('', home),
     path('api/accounts/', include('accounts.urls')),
     path('api/', include('posts.urls')),
 ]
